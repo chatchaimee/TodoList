@@ -1,9 +1,15 @@
 import React, { Component } from 'react'
-import { Container , Segment, Header, Input, Button, Checkbox } from 'semantic-ui-react'
+import {
+  Container,
+  Segment,
+  Header,
+  Input,
+  Button,
+  Checkbox
+} from 'semantic-ui-react'
 
 class TodoList extends Component {
   state = {
-    style: { margin: '5px 0px 0px 0px' },
     value: '',
     todoList: []
   }
@@ -15,44 +21,86 @@ class TodoList extends Component {
   }
 
   handleSubmit = () => {
-    const { value, todoList } = this.state
+    const localStorageData = this.handleGetLocalStorage()
+    const { value } = this.state
+    const { todoList } = localStorageData !== null ? localStorageData : this.state
 
     if (value !== '' && value !== null) {
+      const newTodo = todoList.concat(
+        [
+          {
+            value: value,
+            check: false,
+            textDecoration: 'none'
+          }
+        ])
+
       this.setState({
-        todoList: todoList.concat([value]),
+        todoList: newTodo,
         value: ''
       })
+
+      this.handleSetLocalStorage({ todoList: newTodo })
     } else {
       alert('Please input todo')
     }
   }
 
   handleDelete = (index) => {
-    const { todoList } = this.state
+    const localStorageData = this.handleGetLocalStorage()
+    const { todoList } = localStorageData !== null ? localStorageData : this.state
 
     todoList.splice(index, 1)
 
     this.setState({
         todoList: todoList
     })
+
+    this.handleSetLocalStorage({ todoList: todoList })
   }
 
   handleCheck = (e, data) => {
-    const { checked } = data
+    const { id, checked } = data
+    const localStorageData = this.handleGetLocalStorage()
+    const { todoList } = localStorageData !== null ? localStorageData : this.state
 
-    if (!checked) {
+    if (checked) {
+      todoList[id].check = checked
+      todoList[id].textDecoration = 'line-through'
+
       this.setState({
-        style: { margin: '5px 0px 0px 0px', textDecoration: 'line-through' }
+        todoList: todoList
       })
+
+      this.handleSetLocalStorage({ todoList: todoList })
     } else {
+      todoList[id].check = checked
+      todoList[id].textDecoration = 'none'
+
       this.setState({
-        style: { margin: '5px 0px 0px 0px', textDecoration: 'none' }
+        todoList: todoList
       })
+
+      this.handleSetLocalStorage({ todoList: todoList })
     }
   }
 
+  handleSetLocalStorage = (state) => {
+    localStorage.setItem('todoList', JSON.stringify(state))
+  }
+
+  handleGetLocalStorage = () => (
+    JSON.parse(localStorage.getItem('todoList'))
+  )
+
+  handleDeleteLocalStorage = () => {
+    localStorage.clear()
+  }
+
   render() {
-    const { value, todoList, style } = this.state
+    const localStorageData = this.handleGetLocalStorage()
+    const { value } = this.state
+    const { todoList } = localStorageData !== null ? localStorageData : this.state
 
     return (
       <Container text>
@@ -61,16 +109,40 @@ class TodoList extends Component {
             Todo List
           </Header>
           <Input fluid action type='text' placeholder='Todo...' >
-            <input onChange={this.handleInputChange} value={value} />
-            <Button icon='plus' color='green' onClick={this.handleSubmit} />
+            <input
+              onChange={ this.handleInputChange }
+              value={ value } />
+            <Button
+              icon='plus'
+              color='green'
+              onClick={ this.handleSubmit } />
+            <Button
+              icon='database'
+              content='Clear'
+              color='red'
+              onClick={ this.handleDeleteLocalStorage } />
           </Input>
           <Segment.Group raised>
             {
               todoList.map((value, index) => (
-                <Segment key={index + value}>
-                  <Button icon='close' color='red' floated='right' size='mini' onClick={() => this.handleDelete(index)} />
-                  <Button icon='content' color='blue' floated='right' size='mini' />
-                  <Checkbox style={style} label={value} onClick={this.handleCheck} />
+                <Segment key={ index + value.value }>
+                  <Button
+                    icon='close'
+                    color='red'
+                    floated='right'
+                    size='mini'
+                    onClick={ () => this.handleDelete(index) } />
+                  <Button
+                    icon='content'
+                    color='blue'
+                    floated='right'
+                    size='mini' />
+                  <Checkbox
+                    id={ index }
+                    checked={ value.check }
+                    style={{ margin: '5px 0px 0px 0px', textDecoration: value.textDecoration }}
+                    label={ value.value }
+                    onChange={ this.handleCheck } />
                 </Segment>
               ))
             }
