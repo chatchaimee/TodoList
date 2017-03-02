@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import {
-  Header,
   Button,
   Modal,
   Form
@@ -84,10 +83,9 @@ class Window extends Component {
           size='mini'
           onClick={ () => this.showWindow(true)} />
         <Modal dimmer={ dimmer } open={ openWindow }>
-          <Modal.Header>Select a Photo</Modal.Header>
+          <Modal.Header>Task Detail</Modal.Header>
           <Modal.Content>
             <Modal.Description>
-              <Header>Task detail</Header>
               <Form>
                 <Form.Group widths='equal'>
                   <Form.Input
