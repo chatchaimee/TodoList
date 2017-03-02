@@ -7,6 +7,7 @@ import {
   Button,
   Checkbox
 } from 'semantic-ui-react'
+import Window from './Window'
 
 class TodoList extends Component {
   state = {
@@ -14,16 +15,16 @@ class TodoList extends Component {
     todoList: []
   }
 
-  handleInputChange = (e) => {
+  inputChange = (e) => {
     this.setState({
         value: e.target.value
     })
   }
 
-  handleSubmit = () => {
-    const localStorageData = this.handleGetLocalStorage()
+  submit = () => {
+    const localStorageData = this.getLocalStorage()
     const { value } = this.state
-    const { todoList } = localStorageData !== null ? localStorageData : this.state
+    const { todoList, detailData } = localStorageData !== null ? localStorageData : this.state
 
     if (value !== '' && value !== null) {
       const newTodo = todoList.concat(
@@ -40,29 +41,34 @@ class TodoList extends Component {
         value: ''
       })
 
-      this.handleSetLocalStorage({ todoList: newTodo })
+      this.setLocalStorage({
+        todoList: newTodo,
+        detailData: detailData
+      })
     } else {
       alert('Please input todo')
     }
   }
 
-  handleDelete = (index) => {
-    const localStorageData = this.handleGetLocalStorage()
-    const { todoList } = localStorageData !== null ? localStorageData : this.state
+  delete = (index) => {
+    const localStorageData = this.getLocalStorage()
+    const { todoList, detailData } = localStorageData !== null ? localStorageData : this.state
 
     todoList.splice(index, 1)
+    detailData.splice(index, 1)
 
-    this.setState({
-        todoList: todoList
+    this.setState({ todoList: todoList })
+
+    this.setLocalStorage({
+      todoList: todoList,
+      detailData: detailData
     })
-
-    this.handleSetLocalStorage({ todoList: todoList })
   }
 
-  handleCheck = (e, data) => {
+  checkElement = (e, data) => {
     const { id, checked } = data
-    const localStorageData = this.handleGetLocalStorage()
-    const { todoList } = localStorageData !== null ? localStorageData : this.state
+    const localStorageData = this.getLocalStorage()
+    const { todoList, detailData } = localStorageData !== null ? localStorageData : this.state
 
     if (checked) {
       todoList[id].check = checked
@@ -72,7 +78,10 @@ class TodoList extends Component {
         todoList: todoList
       })
 
-      this.handleSetLocalStorage({ todoList: todoList })
+      this.setLocalStorage({
+        todoList: todoList,
+        detailData: detailData
+      })
     } else {
       todoList[id].check = checked
       todoList[id].textDecoration = 'none'
@@ -81,24 +90,28 @@ class TodoList extends Component {
         todoList: todoList
       })
 
-      this.handleSetLocalStorage({ todoList: todoList })
+      this.setLocalStorage({
+        todoList: todoList,
+        detailData: detailData
+      })
     }
   }
 
-  handleSetLocalStorage = (state) => {
+  setLocalStorage = (state) => {
     localStorage.setItem('todoList', JSON.stringify(state))
   }
 
-  handleGetLocalStorage = () => (
+  getLocalStorage = () => (
     JSON.parse(localStorage.getItem('todoList'))
   )
 
-  handleDeleteLocalStorage = () => {
+  deleteLocalStorage = () => {
     localStorage.clear()
+    location.reload()
   }
 
   render() {
-    const localStorageData = this.handleGetLocalStorage()
+    const localStorageData = this.getLocalStorage()
     const { value } = this.state
     const { todoList } = localStorageData !== null ? localStorageData : this.state
 
@@ -110,17 +123,17 @@ class TodoList extends Component {
           </Header>
           <Input fluid action type='text' placeholder='Todo...' >
             <input
-              onChange={ this.handleInputChange }
+              onChange={ this.inputChange }
               value={ value } />
             <Button
               icon='plus'
               color='green'
-              onClick={ this.handleSubmit } />
+              onClick={ this.submit } />
             <Button
               icon='database'
               content='Clear'
               color='red'
-              onClick={ this.handleDeleteLocalStorage } />
+              onClick={ this.deleteLocalStorage } />
           </Input>
           <Segment.Group raised>
             {
@@ -131,18 +144,14 @@ class TodoList extends Component {
                     color='red'
                     floated='right'
                     size='mini'
-                    onClick={ () => this.handleDelete(index) } />
-                  <Button
-                    icon='content'
-                    color='blue'
-                    floated='right'
-                    size='mini' />
+                    onClick={ () => this.delete(index) } />
+                  <Window id={index} />
                   <Checkbox
                     id={ index }
                     checked={ value.check }
                     style={{ margin: '5px 0px 0px 0px', textDecoration: value.textDecoration }}
                     label={ value.value }
-                    onChange={ this.handleCheck } />
+                    onChange={ this.checkElement } />
                 </Segment>
               ))
             }
