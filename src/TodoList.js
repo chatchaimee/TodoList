@@ -55,7 +55,9 @@ class TodoList extends Component {
     const { todoList, detailData } = localStorageData !== null ? localStorageData : this.state
 
     todoList.splice(index, 1)
-    detailData.splice(index, 1)
+
+    if (typeof detailData !== 'undefined')
+      detailData.splice(index, 1)
 
     this.setState({ todoList: todoList })
 

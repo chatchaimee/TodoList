@@ -43,11 +43,13 @@ class Window extends Component {
 
     if (this.size(detailData) > 0) {
       setData[id] = detailData
+      localStorageData['todoList'][id]['value'] = setData[id]['title']
       localStorageData['detailData'] = setData
       this.setLocalStorage(localStorageData)
     }
 
     this.closeWindow()
+    location.reload()
   }
 
   setLocalStorage = (state) => {
@@ -81,7 +83,7 @@ class Window extends Component {
           color='blue'
           floated='right'
           size='mini'
-          onClick={ () => this.showWindow(true)} />
+          onClick={ () => this.showWindow(true) } />
         <Modal dimmer={ dimmer } open={ openWindow }>
           <Modal.Header>Task Detail</Modal.Header>
           <Modal.Content>
